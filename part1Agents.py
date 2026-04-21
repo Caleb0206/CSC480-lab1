@@ -15,6 +15,7 @@ import heapq
 from dataclasses import dataclass
 
 
+
 class WizardDFS(WizardSearchAgent):
     @dataclass(eq=True, frozen=True, order=True)
     class SearchState:
