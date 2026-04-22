@@ -94,8 +94,10 @@ class WizardMiniMax(ReasoningWizard):
 
 
     def minimax(self, state: GameState, depth: int):
-        if (self.is_terminal(state) or depth == 0):
+        # if terminal, stop immediately
+        if self.is_terminal(state):
             return self.evaluation(state)
+
         successors = self.get_successors(state)
         current_ent = state.get_active_entity()
         ret = None
@@ -103,11 +105,18 @@ class WizardMiniMax(ReasoningWizard):
 
         if isinstance(current_ent, Wizard):
             # Wizard Maximizer - starts comparing to -infinity, decrement depth
+
+            # if depth == 0, only stop if it's a Wizard because Goblins do not decrement depth
+            if depth == 0:
+                return self.evaluation(state)
+
             ret = -(math.inf)
             for (action, succ_state) in successors:
                 ret = max(ret, self.minimax(succ_state, depth-1))
         elif isinstance(current_ent, Goblin):
             # Goblin Minimizer - starts comparing to infinity, DO NOT DECREMENT DEPTH
+            # if depth == 0, Wizard just went, need Goblin to react
+
             ret = math.inf
             for (action, succ_state) in successors:
                 ret = min(ret, self.minimax(succ_state, depth))
@@ -166,7 +175,7 @@ class WizardAlphaBeta(ReasoningWizard):
 
 
     def alpha_beta_minimax(self, state: GameState, depth: int, alpha: float, beta: float):
-        if self.is_terminal(state) or depth == 0:
+        if self.is_terminal(state):
             return self.evaluation(state)
 
         successors = self.get_successors(state)
@@ -175,6 +184,11 @@ class WizardAlphaBeta(ReasoningWizard):
 
         if isinstance(current_ent, Wizard):
             # Wizard Maximizer - starts comparing to -infinity, decrement depth
+
+            # only Wizard decrements depth, so if depth == 0, exit and evaluate
+            if depth == 0:
+                return self.evaluation(state)
+
             val = -(math.inf)
             successors = sorted(successors, key=lambda pair: self.evaluation(pair[1]), reverse=True)
 
@@ -189,6 +203,7 @@ class WizardAlphaBeta(ReasoningWizard):
 
         elif isinstance(current_ent, Goblin):
             # Goblin Minimizer - starts comparing to infinity, DO NOT DECREMENT DEPTH
+            # if depth == 0, Wizard just went, need Goblin to react
             val = math.inf
             successors = sorted(successors, key=lambda pair: self.evaluation(pair[1]), reverse=False)
 
@@ -248,7 +263,7 @@ class WizardExpectimax(ReasoningWizard):
         return max(values, key=values.get)
 
     def expectimax(self, state: GameState, depth: int):
-        if (self.is_terminal(state) or depth == 0):
+        if (self.is_terminal(state)):
             return self.evaluation(state)
         successors = self.get_successors(state)
         current_ent = state.get_active_entity()
@@ -256,6 +271,9 @@ class WizardExpectimax(ReasoningWizard):
 
         if isinstance(current_ent, Wizard):
             # Wizard Maximizer - starts comparing to -infinity, decrement depth
+            if depth == 0:
+                return self.evaluation(state)
+
             ret = -(math.inf)
             for (action, succ_state) in successors:
                 ret = max(ret, self.expectimax(succ_state, depth - 1))
