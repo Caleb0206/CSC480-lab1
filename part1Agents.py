@@ -296,18 +296,21 @@ class CrystalSearchWizard(WizardSearchAgent):
         initial_wizard = self.initial_game_state.get_active_entity()
         crystal_locs = self.initial_game_state.get_all_entity_locations(Crystal)
 
+        # Clear the entire board:
+        # clear Wizard
         new_game_state = self.initial_game_state.replace_entity(initial_wizard_loc.row, initial_wizard_loc.col, EmptyEntity())
+        # clear crystals
         for crystal in crystal_locs:
             new_game_state = new_game_state.replace_entity(crystal.row, crystal.col, EmptyEntity())
+        # Refresh the board with the crystals left
         for crystal in search_state.crystals_left:
             new_game_state = new_game_state.replace_entity(crystal.row, crystal.col, Crystal())
-
+        # new game state = new wizard
         new_game_state = (
             new_game_state.replace_entity(
                 search_state.wizard_loc.row, search_state.wizard_loc.col, initial_wizard
             )
             .replace_active_entity_location(search_state.wizard_loc))
-
 
         return new_game_state
 
@@ -337,7 +340,7 @@ class CrystalSearchWizard(WizardSearchAgent):
 
         return abs(loc1.col - loc2.col) + abs(loc1.row - loc2.row)
 
-    # calculates the heuristic of crystals and portal to the wizard
+    # calculates the heuristic of crystals and portal to the wizard, uses MST
     def heuristic(self, target: GameState) -> float:
         cur_state = self.game_to_search(target)
 
@@ -349,15 +352,15 @@ class CrystalSearchWizard(WizardSearchAgent):
         required_points = list(cur_state.crystals_left)
         required_points.append(cur_state.portal_loc)
 
-        # wizard minimum edge to a requierd point
+        # wizard minimum edge to a required point
         wizard_min_connect = 100000
         for point in required_points:
             wizard_min_connect = min(wizard_min_connect, self.calculate_manhattan(cur_state.wizard_loc, point))
 
-        # Minimum Search Tree
+        # Minimum Spanning Tree
         tree_points = [required_points[0]] # points inside the tree
         out_points = list(required_points[1:]) # points outside the tree
-        mst_cost = 0 # minimum search tree cost
+        mst_cost = 0 # minimum spanning tree cost
 
         # while out_points is not empty:
         while(len(out_points) > 0):
@@ -378,6 +381,7 @@ class CrystalSearchWizard(WizardSearchAgent):
                 # update lists
                 out_points.remove(best_out_pt)
                 tree_points.append(best_out_pt)
+
         # heuristic = min distance wizard to a required point + cost of smallest distance of 2 crystals and/or portal
         return wizard_min_connect + mst_cost
 

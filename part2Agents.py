@@ -47,7 +47,7 @@ class WizardGreedy(ReasoningWizard):
         # heuristic = manhattan(closest goblin - wizard) - manhattan(wizard - portal)
         return closest_g_dist - p_dist
 
-
+# WizardMiniMax: Calculates best path using maximizer (Wizard) and minimizer (Goblin) nodes
 class WizardMiniMax(ReasoningWizard):
     max_depth: int = 2
 
@@ -114,7 +114,7 @@ class WizardMiniMax(ReasoningWizard):
 
         return ret
 
-
+# WizardAlphaBeta: Calculates same as MiniMax but prunes branches that will never be needed
 class WizardAlphaBeta(ReasoningWizard):
     max_depth: int = 2
 
@@ -203,7 +203,7 @@ class WizardAlphaBeta(ReasoningWizard):
 
         return val
 
-
+# WizardExpectimax: Evaluates using the average children value
 class WizardExpectimax(ReasoningWizard):
     max_depth: int = 2
 
