@@ -102,15 +102,15 @@ class WizardMiniMax(ReasoningWizard):
 
 
         if isinstance(current_ent, Wizard):
-            # Wizard Maximizer - starts comparing to -infinity
+            # Wizard Maximizer - starts comparing to -infinity, decrement depth
             ret = -(math.inf)
             for (action, succ_state) in successors:
                 ret = max(ret, self.minimax(succ_state, depth-1))
         elif isinstance(current_ent, Goblin):
-            # Goblin Minimizer - starts comparing to infinity
+            # Goblin Minimizer - starts comparing to infinity, DO NOT DECREMENT DEPTH
             ret = math.inf
             for (action, succ_state) in successors:
-                ret = min(ret, self.minimax(succ_state, depth - 1))
+                ret = min(ret, self.minimax(succ_state, depth))
 
         return ret
 
@@ -174,7 +174,7 @@ class WizardAlphaBeta(ReasoningWizard):
         val = None
 
         if isinstance(current_ent, Wizard):
-            # Wizard Maximizer - starts comparing to -infinity
+            # Wizard Maximizer - starts comparing to -infinity, decrement depth
             val = -(math.inf)
             successors = sorted(successors, key=lambda pair: self.evaluation(pair[1]), reverse=True)
 
@@ -188,12 +188,12 @@ class WizardAlphaBeta(ReasoningWizard):
                     break
 
         elif isinstance(current_ent, Goblin):
-            # Goblin Minimizer - starts comparing to infinity
+            # Goblin Minimizer - starts comparing to infinity, DO NOT DECREMENT DEPTH
             val = math.inf
             successors = sorted(successors, key=lambda pair: self.evaluation(pair[1]), reverse=False)
 
             for (action, succ_state) in successors:
-                val = min(val, self.alpha_beta_minimax(succ_state, depth - 1, alpha, beta))
+                val = min(val, self.alpha_beta_minimax(succ_state, depth, alpha, beta))
                 beta = min(beta, val)
 
                 # if minimizer's best option <= maximizer's best option, prune
@@ -255,7 +255,7 @@ class WizardExpectimax(ReasoningWizard):
         ret = None
 
         if isinstance(current_ent, Wizard):
-            # Wizard Maximizer - starts comparing to -infinity
+            # Wizard Maximizer - starts comparing to -infinity, decrement depth
             ret = -(math.inf)
             for (action, succ_state) in successors:
                 ret = max(ret, self.expectimax(succ_state, depth - 1))
@@ -263,8 +263,8 @@ class WizardExpectimax(ReasoningWizard):
             # Goblin averages the successor values
             successor_sum = 0.0
             for (action, succ_state) in successors:
-                # add up all the successor children values
-                successor_sum += self.expectimax(succ_state, depth - 1)
+                # add up all the successor children values, DO NOT DECREMENT DEPTH
+                successor_sum += self.expectimax(succ_state, depth)
 
             # average the sum
             ret = successor_sum / len(successors)
