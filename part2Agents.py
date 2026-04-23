@@ -52,30 +52,55 @@ class WizardMiniMax(ReasoningWizard):
     max_depth: int = 2
 
     def evaluation(self, state: GameState) -> float:
+        # check the score
+        curr_score = state.score
+
         # if Wizard dead, return -100 (really bad score, should avoid)
         if len(state.get_all_entity_locations(Wizard)) == 0:
-            return -100
+            return curr_score - 50
 
         wiz = state.get_all_entity_locations(Wizard)[0]
         portal = state.get_all_tile_locations(Portal)[0]
+        p_dist = abs(wiz.col - portal.col) + abs(wiz.row - portal.row)
+        goblins = state.get_all_entity_locations(Goblin)
+        crystals = state.get_all_entity_locations(Crystal)
 
         # if Wizard gets to portal, return 300 (really GOOD score, prefer!)
         if wiz == portal:
-            return 300
+            return curr_score + 300
+        else:
+            curr_score -= p_dist
 
-        p_dist = abs(wiz.col - portal.col) + abs(wiz.row - portal.row)
-        goblins = state.get_all_entity_locations(Goblin)
-
-        # initially set closest_g_dist to a big number
-        closest_g_dist = 100000
+        # Find closest goblin distance
+        closest_g_dist = 100000  # initially set closest_g_dist to a big number
         for goblin in goblins:
             g_dist = abs(wiz.col - goblin.col) + abs(wiz.row - goblin.row)
             # if this goblin closer to the wizard than previous goblin, update
             if g_dist < closest_g_dist:
                 closest_g_dist = g_dist
 
-        # heuristic = manhattan(closest goblin - wizard) - manhattan(wizard - portal)
-        return closest_g_dist - p_dist
+        # Find closest crystal distance
+        closest_c_dist = 100000
+        for crystal in crystals:
+            c_dist = abs(wiz.col - crystal.col) + abs(wiz.row - crystal.row)
+            if c_dist < closest_c_dist:
+                closest_c_dist = c_dist
+
+        # Closer Wizard is to Goblin, worse the score
+        if closest_g_dist == 1:
+            curr_score -= 40
+        elif closest_g_dist == 2:
+            curr_score -= 35
+        elif closest_g_dist == 3:
+            curr_score -= 25
+        else:
+            curr_score += 5
+
+        # Reward for closer crystal distance
+        if (closest_c_dist <= 4):
+            curr_score += 5
+
+        return curr_score
 
     def is_terminal(self, state: GameState) -> bool:
         return (len(state.get_all_entity_locations(Wizard)) == 0 or
@@ -86,12 +111,12 @@ class WizardMiniMax(ReasoningWizard):
         # edited ReasoningWizard's react to fit MiniMax algorithm
         values: dict[WizardMoves, float] = {}
         successors = self.get_successors(state)
+        successors = sorted(successors, key=lambda pair: self.evaluation(pair[1]), reverse=True)
 
         for (action, succ_state) in successors:
             values[action] = self.minimax(succ_state, self.max_depth - 1)
 
         return max(values, key=values.get)
-
 
     def minimax(self, state: GameState, depth: int):
         # if terminal, stop immediately
@@ -101,7 +126,6 @@ class WizardMiniMax(ReasoningWizard):
         successors = self.get_successors(state)
         current_ent = state.get_active_entity()
         ret = None
-
 
         if isinstance(current_ent, Wizard):
             # Wizard Maximizer - starts comparing to -infinity, decrement depth
@@ -128,30 +152,55 @@ class WizardAlphaBeta(ReasoningWizard):
     max_depth: int = 2
 
     def evaluation(self, state: GameState) -> float:
+        # check the score
+        curr_score = state.score
+
         # if Wizard dead, return -100 (really bad score, should avoid)
         if len(state.get_all_entity_locations(Wizard)) == 0:
-            return -100
+            return curr_score -50
 
         wiz = state.get_all_entity_locations(Wizard)[0]
         portal = state.get_all_tile_locations(Portal)[0]
+        p_dist = abs(wiz.col - portal.col) + abs(wiz.row - portal.row)
+        goblins = state.get_all_entity_locations(Goblin)
+        crystals = state.get_all_entity_locations(Crystal)
 
         # if Wizard gets to portal, return 300 (really GOOD score, prefer!)
         if wiz == portal:
-            return 300
+            return curr_score + 300
+        else:
+            curr_score -= p_dist
 
-        p_dist = abs(wiz.col - portal.col) + abs(wiz.row - portal.row)
-        goblins = state.get_all_entity_locations(Goblin)
-
-        # initially set closest_g_dist to a big number
-        closest_g_dist = 100000
+        # Find closest goblin distance
+        closest_g_dist = 100000     # initially set closest_g_dist to a big number
         for goblin in goblins:
             g_dist = abs(wiz.col - goblin.col) + abs(wiz.row - goblin.row)
             # if this goblin closer to the wizard than previous goblin, update
             if g_dist < closest_g_dist:
                 closest_g_dist = g_dist
 
-        # heuristic = manhattan(closest goblin - wizard) - manhattan(wizard - portal)
-        return closest_g_dist - p_dist
+        # Find closest crystal distance
+        closest_c_dist = 100000
+        for crystal in crystals:
+            c_dist = abs(wiz.col - crystal.col) + abs(wiz.row - crystal.row)
+            if c_dist < closest_c_dist:
+                closest_c_dist = c_dist
+
+        # Closer Wizard is to Goblin, worse the score
+        if closest_g_dist == 1:
+            curr_score -= 40
+        elif closest_g_dist == 2:
+            curr_score -= 35
+        elif closest_g_dist == 3:
+            curr_score -= 25
+        else:
+            curr_score += 5
+
+        # Reward for closer crystal distance
+        if (closest_c_dist <= 4):
+            curr_score += 5
+
+        return curr_score
 
     def is_terminal(self, state: GameState) -> bool:
         return (len(state.get_all_entity_locations(Wizard)) == 0 or
