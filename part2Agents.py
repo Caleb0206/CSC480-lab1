@@ -62,14 +62,17 @@ class WizardMiniMax(ReasoningWizard):
         wiz = state.get_all_entity_locations(Wizard)[0]
         portal = state.get_all_tile_locations(Portal)[0]
         p_dist = abs(wiz.col - portal.col) + abs(wiz.row - portal.row)
-        goblins = state.get_all_entity_locations(Goblin)
-        crystals = state.get_all_entity_locations(Crystal)
 
         # if Wizard gets to portal, return 300 (really GOOD score, prefer!)
         if wiz == portal:
             return curr_score + 300
         else:
             curr_score -= p_dist
+
+        goblins = state.get_all_entity_locations(Goblin)
+        # crystals = state.get_all_entity_locations(Crystal)
+
+
 
         # Find closest goblin distance
         closest_g_dist = 100000  # initially set closest_g_dist to a big number
@@ -80,11 +83,11 @@ class WizardMiniMax(ReasoningWizard):
                 closest_g_dist = g_dist
 
         # Find closest crystal distance
-        closest_c_dist = 100000
-        for crystal in crystals:
-            c_dist = abs(wiz.col - crystal.col) + abs(wiz.row - crystal.row)
-            if c_dist < closest_c_dist:
-                closest_c_dist = c_dist
+        # closest_c_dist = 100000
+        # for crystal in crystals:
+        #     c_dist = abs(wiz.col - crystal.col) + abs(wiz.row - crystal.row)
+        #     if c_dist < closest_c_dist:
+        #         closest_c_dist = c_dist
 
         # Closer Wizard is to Goblin, worse the score
         if closest_g_dist == 1:
@@ -97,8 +100,8 @@ class WizardMiniMax(ReasoningWizard):
             curr_score += 5
 
         # Reward for closer crystal distance
-        if (closest_c_dist <= 4):
-            curr_score += 5
+        # if (closest_c_dist <= 4):
+        #     curr_score += 5
 
         return curr_score
 
@@ -157,19 +160,20 @@ class WizardAlphaBeta(ReasoningWizard):
 
         # if Wizard dead, return -100 (really bad score, should avoid)
         if len(state.get_all_entity_locations(Wizard)) == 0:
-            return curr_score -50
+            return curr_score - 50
 
         wiz = state.get_all_entity_locations(Wizard)[0]
         portal = state.get_all_tile_locations(Portal)[0]
         p_dist = abs(wiz.col - portal.col) + abs(wiz.row - portal.row)
-        goblins = state.get_all_entity_locations(Goblin)
-        crystals = state.get_all_entity_locations(Crystal)
 
         # if Wizard gets to portal, return 300 (really GOOD score, prefer!)
         if wiz == portal:
             return curr_score + 300
         else:
             curr_score -= p_dist
+
+        goblins = state.get_all_entity_locations(Goblin)
+        # crystals = state.get_all_entity_locations(Crystal)
 
         # Find closest goblin distance
         closest_g_dist = 100000     # initially set closest_g_dist to a big number
@@ -180,11 +184,11 @@ class WizardAlphaBeta(ReasoningWizard):
                 closest_g_dist = g_dist
 
         # Find closest crystal distance
-        closest_c_dist = 100000
-        for crystal in crystals:
-            c_dist = abs(wiz.col - crystal.col) + abs(wiz.row - crystal.row)
-            if c_dist < closest_c_dist:
-                closest_c_dist = c_dist
+        # closest_c_dist = 100000
+        # for crystal in crystals:
+        #     c_dist = abs(wiz.col - crystal.col) + abs(wiz.row - crystal.row)
+        #     if c_dist < closest_c_dist:
+        #         closest_c_dist = c_dist
 
         # Closer Wizard is to Goblin, worse the score
         if closest_g_dist == 1:
@@ -197,8 +201,8 @@ class WizardAlphaBeta(ReasoningWizard):
             curr_score += 5
 
         # Reward for closer crystal distance
-        if (closest_c_dist <= 4):
-            curr_score += 5
+        # if (closest_c_dist <= 4):
+        #     curr_score += 5
 
         return curr_score
 
@@ -220,8 +224,6 @@ class WizardAlphaBeta(ReasoningWizard):
             alpha = max(alpha, values[action])
 
         return max(values, key=values.get)
-
-
 
     def alpha_beta_minimax(self, state: GameState, depth: int, alpha: float, beta: float):
         if self.is_terminal(state):
